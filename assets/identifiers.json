@@ -1,0 +1,9 @@
+{
+    "economic_indicators": {
+      "Real GDP": "GDPC1",
+      "Real Effective Exchange Rate": "RBUSBIS",
+      "Unemployment Rate": "UNRATE",
+      "OECD Indicator": "CSCICP03USM665S",
+      "Long-term government bond yields": "IRLTLT01USM156N"
+    }
+}
