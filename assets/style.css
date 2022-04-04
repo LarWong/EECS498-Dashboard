@@ -241,7 +241,7 @@ font-family: "Open Sans Semi Bold"
 }
 
 input{
-  color: white;
+  color: black;
 }
 .button, button, input[type="submit"], input[type="reset"], input[type="button"] {
 display: inline-block;
@@ -268,12 +268,12 @@ border-color: #888;
 outline: 0;
 }
 .button.button-primary, button.button-primary, input[type="submit"].button-primary, input[type="reset"].button-primary, input[type="button"].button-primary {
-color: #FFF;
+color: #000000;
 background-color: #33C3F0;
 border-color: #33C3F0;
 }
 .button.button-primary:hover, button.button-primary:hover, input[type="submit"].button-primary:hover, input[type="reset"].button-primary:hover, input[type="button"].button-primary:hover, .button.button-primary:focus, button.button-primary:focus, input[type="submit"].button-primary:focus, input[type="reset"].button-primary:focus, input[type="button"].button-primary:focus {
-color: #FFF;
+color: black;
 background-color: #1EAEDB;
 border-color: #1EAEDB;
 }
@@ -461,13 +461,13 @@ padding: 5px;
 .div-for-charts{
 display: flex;
 flex-direction: column;
-height: 50vh;
+height: 100vh;
 width: 100%;
 }
 .div-for-model{
 display: flex;
 flex-direction: row;
-height: 50vh;
+height: 100vh;
 width: 100%;
 }
 #histogram {
@@ -494,9 +494,13 @@ padding-bottom: 2px;
 padding-left: 2px;
 }
 .div-for-slider {
-width: 97%;
+width: 100%;
 text-align: center;
+height: 40vh
 }
+.rc-slider-disabled{
+    background-color: #1E1E1E;
+  }
 .logo {
 height: 50px;
 padding-bottom: 12px;
