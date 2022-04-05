@@ -2,26 +2,25 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 from dash import Dash, html, dcc
-from dash.dependencies import Input, Output
-from data import get_eco_indicators, get_fred_data
+from dash.dependencies import Input, Output, State
+from data import get_eco_indicators, get_fred_data, get_paired_data, create_graph_and_data
 
-test_options1 = ['a', 'b', 'c']
-test_options2 = ['d', 'e', 'f']
-test_value = [1, 2, 3]
 eco_indicators = get_eco_indicators()
-
+test_x = ['a', 'b', 'c']
+test_y = [10, 1, 5]
 
 app = Dash(__name__)
 
 app.layout = html.Div(
     children=[
+        # ECONOMIC
         html.Div(
             className='row',
             children=[
                 html.Div(
                     className='three columns div-user-controls',
                     children=[
-                        html.H2('ECONOMIC VISUALIZATION'),
+                        html.H1('ECONOMIC DATA VISUALIZATION'),
                         html.P('Visualising ECONOMIC data.'),
 
                         html.Div(
@@ -64,7 +63,7 @@ app.layout = html.Div(
                         # html.Div(),
                     ]),
                 html.Div(
-                    className='nine columns bg-grey',
+                    className='nine columns div-for-charts bg-grey',
                     children=[
                         html.Div([
                                 html.Div([dcc.Graph(id='ecofig1', 
@@ -74,7 +73,8 @@ app.layout = html.Div(
                                                 'paper_bgcolor': '#1E1E1E',
                                                 'font': {
                                                     'color': 'white'
-                                                }
+                                                },
+                                                'height': 600
                                             }
                                         }
                                 )], style={'width': '50%'}),
@@ -85,7 +85,8 @@ app.layout = html.Div(
                                                 'paper_bgcolor': '#1E1E1E',
                                                 'font': {
                                                     'color': 'white'
-                                                }
+                                                },
+                                                'height': 600
                                             }
                                         }
                                 )], style={'width': '50%'}),
@@ -96,21 +97,23 @@ app.layout = html.Div(
                                             'plot_bgcolor': '#1E1E1E',
                                             'paper_bgcolor': '#1E1E1E',
                                             'font': {
-                                                'color': 'white'
-                                            }
+                                                'color': 'white',
+                                                'size': 15
+                                            },
+                                            'height': 500
                                         }
                                       }
                             ),
-                    ], style={'padding': '10px 5px', 'white-space': 'nowrap'}
+                    ], style={'padding': '10px 5px'}
                     ), 
             ]),
         
-        
+        # TEXT
         html.Div(
             className='row',
             children=[
                 html.Div(
-                    className='four columns div-user-controls',
+                    className='three columns div-user-controls',
                     children=[
                         html.H2('TEXT VISUALIZATION'),
                         html.P('Visualising TEXT data.'),
@@ -125,18 +128,41 @@ app.layout = html.Div(
                             ]),
                     ]),
             html.Div(
-                className='eight columns div-for-charts bg-grey',
-                children=[])
+                className='nine columns div-for-charts bg-grey',
+                children=[
+                    html.Div([
+                        html.Div([html.Img(src='assets/test.png', 
+                                           style={'width': '100%', 'height': '100%', 'objectFit': 'contain'})], 
+                                    style={'width': '50%'}
+                                ),
+                        html.Div([dcc.Graph(id='textvar', 
+                            figure={
+                                'layout': {
+                                    'plot_bgcolor': '#1E1E1E',
+                                    'paper_bgcolor': '#1E1E1E',
+                                    'font': {
+                                        'color': 'white'
+                                    },
+                                    'height': 550
+                                },
+                            }
+                        )], style={'width': '50%'})
+                        ], style={'display': 'flex'}),
+                ], style={'padding': '30px 5px'})
             ]),
 ])
 
 @app.callback(
     Output('ecodropdown1', 'value'),
     Output('ecodropdown2', 'value'),
-    Input('btn-swap', 'n_clicks')
+    Input('btn-swap', 'n_clicks'),
+    State('ecodropdown1', 'value'),
+    State('ecodropdown2', 'value')
 )
-def swap_graphs(ind1, ind2):
-    print('yo')
+def swap_graphs(clicks, ind1, ind2):
+    """
+    Swap the two graphs
+    """
     return ind2, ind1
 
 @app.callback(
@@ -144,18 +170,38 @@ def swap_graphs(ind1, ind2):
     Output('ecofig1', 'figure'),
     Input('ecodropdown1', 'value')
 )
-def output_fig(ind):
-    fred_info = get_fred_data(ind)
-    metadata = fred_info['metadata']
-    data = fred_info['data']
-    
-    data_description = ['{}'.format(metadata['title'][0]),
-                        'Unit: {}'.format(metadata['units'][0]),
-                        'Frequency: {}'.format(metadata['frequency'][0]),
-                        'Last Updated: {}'.format(metadata['last_updated'][0])]
+def output_fig1(ind):
+    """
+    Display graph and metadata
+    """
+    return create_graph_and_data(ind)
 
-    fig = px.line(data, x='Date', y=metadata['units'][0], title=ind)
-    fig.update_traces(line_color='#ff0000', hovertemplate=None)
+@app.callback(
+    Output('ecodesc2', 'children'),
+    Output('ecofig2', 'figure'),
+    Input('ecodropdown2', 'value')
+)
+def output_fig2(ind):
+    """
+    Display graph and metadata
+    """
+    return create_graph_and_data(ind)
+
+@app.callback(
+    Output('ecomerge', 'figure'),
+    Input('ecodropdown1', 'value'),
+    Input('ecodropdown2', 'value')
+)
+def output_merged(ind1, ind2):
+    """
+    Display graph and metadata
+    """
+    merged_data = get_paired_data(ind1, ind2)['merged']
+    indicators = merged_data.columns[1:]
+    
+    fig = px.scatter(merged_data[indicators], x=indicators[0], y=indicators[1],
+                     title="{} vs. {}".format(ind1, ind2))
+    fig.update_traces(line_color='#ff0000')
     
     fig.update_layout(
         transition_duration=500,
@@ -166,45 +212,7 @@ def output_fig(ind):
         plot_bgcolor='#1E1E1E',
         paper_bgcolor='#1E1E1E',
     )
-    
-    # Add range slider
-    fig.update_layout(
-        xaxis=dict(
-            rangeselector=dict(
-                buttons=list([
-                    dict(count=1,
-                        label="1m",
-                        step="month",
-                        stepmode="backward"),
-                    dict(count=6,
-                        label="6m",
-                        step="month",
-                        stepmode="backward"),
-                    dict(count=1,
-                        label="YTD",
-                        step="year",
-                        stepmode="todate"),
-                    dict(count=1,
-                        label="1y",
-                        step="year",
-                        stepmode="backward"),
-                    dict(step="all")
-                ]),
-                font=dict(color='black')
-            ),
-            rangeslider=dict(
-                visible=True
-            ),
-            type="date"
-        )
-)
-
-    date_min = pd.to_datetime(data['Date']).min()
-    date_max = pd.to_datetime(data['Date']).max()
-    slider_value = data['Date'].max()
-    
-    
-    return [html.P(x) for x in data_description], fig
+    return fig
 
 
 if __name__ == '__main__':
