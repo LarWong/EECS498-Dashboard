@@ -1,13 +1,28 @@
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
-from dash import Dash, html, dcc
+from collections import OrderedDict
+from dash import Dash, html, dcc, dash_table
 from dash.dependencies import Input, Output, State
 from data import get_eco_indicators, get_fred_data, get_paired_data, create_graph_and_data
 
 eco_indicators = get_eco_indicators()
 test_x = ['a', 'b', 'c']
 test_y = [10, 1, 5]
+
+data = OrderedDict(
+    [
+        ("Date", ["2015-01-01", "2015-10-24", "2016-05-10", "2017-01-10", "2018-05-10", "2018-08-15"]),
+        ("Region", ["Montreal", "Toronto", "New York City", "Miami", "San Francisco", "London"]),
+        ("Temperature", [1, -20, 3.512, 4, 10423, -441.2]),
+        ("Humidity", [10, 20, 30, 40, 50, 60]),
+        ("Pressure", [2, 10924, 3912, -10, 3591.2, 15]),
+    ]
+)
+
+df = pd.DataFrame(
+    OrderedDict([(name, col_data * 10) for (name, col_data) in data.items()])
+)
 
 app = Dash(__name__)
 
@@ -31,7 +46,7 @@ app.layout = html.Div(
                                              value='Real GDP',
                                              clearable=False,
                                              searchable=False,
-                                             style={'backgroundColor': '#1E1E1E'}),
+                                             style={'backgroundColor': '#1E1E1E', 'background': '#1E1E1E'}),
                             ]),
                         html.H3('Top Left Description'),
                         
@@ -131,23 +146,41 @@ app.layout = html.Div(
                 className='nine columns div-for-charts bg-grey',
                 children=[
                     html.Div([
-                        html.Div([html.Img(src='assets/test.png', 
-                                           style={'width': '100%', 'height': '100%', 'objectFit': 'contain'})], 
-                                    style={'width': '50%'}
-                                ),
-                        html.Div([dcc.Graph(id='textvar', 
-                            figure={
-                                'layout': {
-                                    'plot_bgcolor': '#1E1E1E',
-                                    'paper_bgcolor': '#1E1E1E',
-                                    'font': {
-                                        'color': 'white'
+                        html.Div([
+                            html.Img(src='assets/test.png', 
+                                style={'width': '100%', 'height': '100%', 'objectFit': 'contain'})], 
+                                style={'width': '50%'}
+                            ),
+                        html.Div([
+                            dcc.Graph(id='textvar', 
+                                figure={
+                                    'layout': {
+                                        'plot_bgcolor': '#1E1E1E',
+                                        'paper_bgcolor': '#1E1E1E',
+                                        'font': {
+                                            'color': 'white'
+                                        },
+                                        'height': 550
                                     },
-                                    'height': 550
-                                },
                             }
                         )], style={'width': '50%'})
                         ], style={'display': 'flex'}),
+                        # Slider
+                        html.Div([
+                            dcc.Slider(0, 50, 1,
+                                   value=10,
+                                    marks={
+                                        0: {'label': '0', 'style': {'color': '#77b0b1', 'font_size': 20}},
+                                        50: {'label': '50', 'style': {'color': '#f50', 'font_size': 20}}
+                                    },
+                                   id='top_n_slider'
+                        )], style={'padding': '30px 5px'}),
+                        html.Div([dash_table.DataTable(
+                            data=df.to_dict('records'),
+                            columns=[{'id': c, 'name': c} for c in df.columns],
+                            page_action='none',
+                            style_table={'height': '300px', 'overflowY': 'auto'}
+                        )])
                 ], style={'padding': '30px 5px'})
             ]),
 ])

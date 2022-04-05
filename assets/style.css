@@ -241,7 +241,7 @@ font-family: "Open Sans Semi Bold"
 }
 
 input{
-  color: black;
+  color: #1e1e1e;
 }
 .button, button, input[type="submit"], input[type="reset"], input[type="button"] {
 display: inline-block;
@@ -282,7 +282,7 @@ input[type="email"], input[type="number"], input[type="search"], input[type="tex
 height: 38px;
 padding: 6px 10px;
 /* The 6px vertically centers text on FF, ignored by Webkit */
-background-color: #fff;
+background-color: #1E1E1E;
 border: 1px solid #D1D1D1;
 border-radius: 4px;
 box-shadow: none;
@@ -506,25 +506,31 @@ height: 50px;
 padding-bottom: 12px;
 }
 .Select-control, .Select-menu-outer, .Select-multi-value-wrapper, .select-up, .is-open .Select-control {
-color: white;
-background-color: #1E1E1E;
+color: white !important;
+background: #1E1E1E !important;
+background-color: #1E1E1E !important;
+}
+
+.Select-input{
+    background: #1E1E1E !important;
+    background-color: #1E1E1E !important; 
 }
 
 #modelselector .Select-control{
 max-height: 82px;
 overflow-y: auto;
 margin: 0px 0px -3px 0px;
-border: 0.5px solid #dbdbdb44;
+border: 0.5px solid #dbdbdb44 !important;
 }
 
 .Select-control{
-border: 0.5px solid #dbdbdb44;
+border: 0.5px solid #dbdbdb44 !important;
 }
 
 .has-value.Select--single>.Select-control .Select-value .Select-value-label, .has-value.is-pseudo-focused.Select--single>.Select-control .Select-value .Select-value-label {
-color: white;
-background: #1E1E1E;
-background-color: #1E1E1E;
+color: white !important;
+background: #1E1E1E !important;
+background-color: #1E1E1E !important;
 }
 ._dash-app-content {
 overflow-x: hidden;
@@ -532,13 +538,13 @@ overflow-y: hidden;
 position: relative;
 }
 .has-value.Select--single>.Select-control .Select-value .Select-value-label, .has-value.is-pseudo-focused.Select--single>.Select-control .Select-value .Select-value-labeln {
-color: #d8d8d8;
+color: #d8d8d8 !important;
 font-weight: 400;
 font-size: 14px;
 }
 
 .Input.DateInput_1 {
-background-color: white;
+background-color: 1E1E1E;
 }
 
 #date {
