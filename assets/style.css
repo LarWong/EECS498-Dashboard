@@ -240,8 +240,12 @@ font-family: "Open Sans Semi Bold" !important
 font-family: "Open Sans Semi Bold"
 }
 
+.dash-spreadsheet.dash-freeze-top, .dash-spreadsheet.dash-virtualized {
+    max-height: unset !important;
+}
+
 input{
-  color: #1e1e1e;
+  color: white;
 }
 .button, button, input[type="submit"], input[type="reset"], input[type="button"] {
 display: inline-block;
@@ -263,7 +267,7 @@ cursor: pointer;
 box-sizing: border-box;
 }
 .button:hover, button:hover, input[type="submit"]:hover, input[type="reset"]:hover, input[type="button"]:hover, .button:focus, button:focus, input[type="submit"]:focus, input[type="reset"]:focus, input[type="button"]:focus {
-color: #333;
+color: white;
 border-color: #888;
 outline: 0;
 }
@@ -514,6 +518,7 @@ background-color: #1E1E1E !important;
 .Select-input{
     background: #1E1E1E !important;
     background-color: #1E1E1E !important; 
+    color: white !important
 }
 
 #modelselector .Select-control{

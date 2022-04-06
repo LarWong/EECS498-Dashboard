@@ -1,30 +1,25 @@
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
+
+import base64
+import wordcloud
+
 from collections import OrderedDict
 from dash import Dash, html, dcc, dash_table
 from dash.dependencies import Input, Output, State
-from data import get_eco_indicators, get_fred_data, get_paired_data, create_graph_and_data
+import dash_bootstrap_components as dbc
+from io import BytesIO
+from text import *
+from data import *
 
 eco_indicators = get_eco_indicators()
-test_x = ['a', 'b', 'c']
-test_y = [10, 1, 5]
+text_data = preprocess_text()
+text_ctr = get_counter(text_data['newContentRemove'])
+index_mapping = map_word_to_index(text_ctr['Word'])
+# print(sentence_mapping)
 
-data = OrderedDict(
-    [
-        ("Date", ["2015-01-01", "2015-10-24", "2016-05-10", "2017-01-10", "2018-05-10", "2018-08-15"]),
-        ("Region", ["Montreal", "Toronto", "New York City", "Miami", "San Francisco", "London"]),
-        ("Temperature", [1, -20, 3.512, 4, 10423, -441.2]),
-        ("Humidity", [10, 20, 30, 40, 50, 60]),
-        ("Pressure", [2, 10924, 3912, -10, 3591.2, 15]),
-    ]
-)
-
-df = pd.DataFrame(
-    OrderedDict([(name, col_data * 10) for (name, col_data) in data.items()])
-)
-
-app = Dash(__name__)
+app = Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
 
 app.layout = html.Div(
     children=[
@@ -115,7 +110,7 @@ app.layout = html.Div(
                                                 'color': 'white',
                                                 'size': 15
                                             },
-                                            'height': 500
+                                            'height': 490
                                         }
                                       }
                             ),
@@ -132,25 +127,24 @@ app.layout = html.Div(
                     children=[
                         html.H2('TEXT VISUALIZATION'),
                         html.P('Visualising TEXT data.'),
-
+                        html.Br(),
+                        html.P('Search for word in vocabulary below'),
                         html.Div(
                             className='div-for-dropdown',
                             children=[
                                 dcc.Dropdown(id='textdropdown',
-                                             options=eco_indicators,
-                                             searchable=False,
-                                             style={'backgroundColor': '#1E1E1E'}),
-                            ]),
+                                             options=text_ctr['Word'],
+                                             searchable=True,
+                                             multi=False,
+                                             clearable=False,
+                                             value=text_ctr['Word'][0],
+                                             style={'backgroundColor': '#1E1E1E', 'color': 'white'}),
+                            ], style={'fontColor': 'white'}),
                     ]),
             html.Div(
                 className='nine columns div-for-charts bg-grey',
                 children=[
                     html.Div([
-                        html.Div([
-                            html.Img(src='assets/test.png', 
-                                style={'width': '100%', 'height': '100%', 'objectFit': 'contain'})], 
-                                style={'width': '50%'}
-                            ),
                         html.Div([
                             dcc.Graph(id='textvar', 
                                 figure={
@@ -160,31 +154,38 @@ app.layout = html.Div(
                                         'font': {
                                             'color': 'white'
                                         },
-                                        'height': 550
+                                        # 'height': 600
                                     },
                             }
-                        )], style={'width': '50%'})
+                        )], style={'width': '50%'}),
+                        html.Div([
+                            html.Img(id='wordcloud_img',
+                                style={'width': '100%', 'height': '100%'})], 
+                                # style={'width': '50%'}
+                            )
                         ], style={'display': 'flex'}),
                         # Slider
                         html.Div([
-                            dcc.Slider(0, 50, 1,
-                                   value=10,
+                            dcc.Slider(1, 20, 1,
+                                    value=10,
                                     marks={
-                                        0: {'label': '0', 'style': {'color': '#77b0b1', 'font_size': 20}},
-                                        50: {'label': '50', 'style': {'color': '#f50', 'font_size': 20}}
+                                        1: {'label': '1', 'style': {'color': 'white', 'font_size': 50}},
+                                        20: {'label': '50', 'style': {'color': 'white', 'font_size': 50}}
                                     },
                                    id='top_n_slider'
-                        )], style={'padding': '30px 5px'}),
-                        html.Div([dash_table.DataTable(
-                            data=df.to_dict('records'),
-                            columns=[{'id': c, 'name': c} for c in df.columns],
-                            page_action='none',
-                            style_table={'height': '300px', 'overflowY': 'auto'}
-                        )])
-                ], style={'padding': '30px 5px'})
+                        )], style={'background': '#1e1e1e', 'padding': '5px 5px'}),
+                        dash_table.DataTable(
+                            id='relevanttext',
+                            # page_size=30,
+                            style_table={'backgroundColor': 'black',
+                                         'fontWeight': 'bold',
+                                         'height': '100%'}
+                        )
+                ], style={'padding': '10px 5px'})
             ]),
 ])
 
+################## Economic Data ##################
 @app.callback(
     Output('ecodropdown1', 'value'),
     Output('ecodropdown2', 'value'),
@@ -194,7 +195,7 @@ app.layout = html.Div(
 )
 def swap_graphs(clicks, ind1, ind2):
     """
-    Swap the two graphs
+    Swap the two economic data graphs
     """
     return ind2, ind1
 
@@ -205,7 +206,7 @@ def swap_graphs(clicks, ind1, ind2):
 )
 def output_fig1(ind):
     """
-    Display graph and metadata
+    Display economic data graph and metadata
     """
     return create_graph_and_data(ind)
 
@@ -216,7 +217,7 @@ def output_fig1(ind):
 )
 def output_fig2(ind):
     """
-    Display graph and metadata
+    Display economic data graph and metadata
     """
     return create_graph_and_data(ind)
 
@@ -227,7 +228,7 @@ def output_fig2(ind):
 )
 def output_merged(ind1, ind2):
     """
-    Display graph and metadata
+    Display economic data merged graph and metadata
     """
     merged_data = get_paired_data(ind1, ind2)['merged']
     indicators = merged_data.columns[1:]
@@ -247,6 +248,43 @@ def output_merged(ind1, ind2):
     )
     return fig
 
+################## Text Data ##################
+@app.callback(
+    Output('textvar', 'figure'),
+    Output('wordcloud_img', 'src'),
+    Input('textdropdown', 'value'),
+    Input('top_n_slider', 'value')
+)
+def output_text_viz(word, top_n):
+    """
+    Display text data graph
+    """
+    # Bar chart
+    word_index = index_mapping[word]
+    freq_data = text_ctr[word_index: word_index + top_n]
+    title = '{} Frequency {}'.format(word.upper(), 
+                                     '' if top_n == 1 else 'and the Next {}Largest Word(s)'.format(
+                                         '' if top_n == 2 else str(top_n-1) + ' '))
+    
+    # Word Cloud
+    img = BytesIO()
+    generate_word_cloud(freq_data).save(img, format='PNG')
+    
+    return generate_bar_data(freq_data, title), 'data:image/png;base64,{}'.format(base64.b64encode(img.getvalue()).decode())
+
+@app.callback(
+    Output('relevanttext', 'data'),
+    Input('textdropdown', 'value'),
+)
+def output_text(word):
+    """
+    Display text data graph
+    """
+    t = text_data['content'][sentence_mapping[word]]
+    print(sentence_mapping[word])
+    # print(t)
+    # for x in t:
+    #     print(x)
 
 if __name__ == '__main__':
     app.run_server(debug=True)
