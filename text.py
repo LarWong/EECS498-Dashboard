@@ -48,7 +48,11 @@ def preprocess_text():
     TODO: Replace with real data
     '''
     # read in example text
-    df = pd.read_csv('./assets/example_text/bbc-news-data.csv', sep='\t')
+    df = pd.read_csv('./assets/reuters_headlines.csv')
+    df.rename(columns={'Headlines': 'content'}, inplace=True)
+    del df['Time']
+    del df['Description']
+    
 
     cleaned_sentence = []
     for sent_idx in range(len(df['content'])):
