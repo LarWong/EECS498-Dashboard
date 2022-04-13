@@ -4,6 +4,11 @@
     "Real Effective Exchange Rate": "RBUSBIS",
     "Unemployment Rate": "UNRATE",
     "OECD Indicator": "CSCICP03USM665S",
-    "Long-term government bond yields": "IRLTLT01USM156N"
+    "Long-term government bond yields": "IRLTLT01USM156N",
+    "Interest Rate": "DFF",
+    "Exchange": "DEXUSEU",
+    "Uncertainty": "USEPUINDXD",
+    "Volitility": "VIXCLS",
+    "Inflation": "T10YIE"
   }
 }
